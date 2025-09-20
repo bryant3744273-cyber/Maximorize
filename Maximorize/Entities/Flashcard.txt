@@ -1,0 +1,58 @@
+{
+  "name": "Flashcard",
+  "type": "object",
+  "properties": {
+    "question_text": {
+      "type": "string",
+      "description": "Question content"
+    },
+    "answer_text": {
+      "type": "string",
+      "description": "Answer content"
+    },
+    "question_image": {
+      "type": "string",
+      "description": "Question image URL"
+    },
+    "answer_image": {
+      "type": "string",
+      "description": "Answer image URL"
+    },
+    "subject_id": {
+      "type": "string",
+      "description": "ID of the parent subject"
+    },
+    "topic_id": {
+      "type": "string",
+      "description": "ID of the parent topic"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of tags"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "default": "medium",
+      "description": "Card difficulty level"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Order within topic"
+    }
+  },
+  "required": [
+    "question_text",
+    "answer_text",
+    "subject_id",
+    "topic_id"
+  ]
+}

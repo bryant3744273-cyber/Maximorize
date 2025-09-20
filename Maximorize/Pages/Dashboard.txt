@@ -1,0 +1,194 @@
+import React, { useState, useEffect } from "react";
+import { Subject, Topic, Flashcard } from "@/entities/all";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { 
+  BookOpen, 
+  Brain, 
+  Plus, 
+  TrendingUp, 
+  Target,
+  Sparkles,
+  ArrowRight,
+  Clock
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+import StatsOverview from "../components/dashboard/StatsOverview";
+import RecentActivity from "../components/dashboard/RecentActivity";
+import QuickActions from "../components/dashboard/QuickActions";
+
+export default function Dashboard() {
+  const [subjects, setSubjects] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [flashcards, setFlashcards] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const [subjectsData, topicsData, flashcardsData] = await Promise.all([
+        Subject.list(),
+        Topic.list(),
+        Flashcard.list('-created_date', 10)
+      ]);
+      
+      setSubjects(subjectsData);
+      setTopics(topicsData);
+      setFlashcards(flashcardsData);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                Welcome to 
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-2">
+                  Maximorize
+                </span>
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Transform your learning with scientifically-designed flashcards
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <Link to={createPageUrl("Study")}>
+                <Button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <Brain className="w-5 h-5 mr-2" />
+                  Start Studying
+                </Button>
+              </Link>
+              <Link to={createPageUrl("Create")}>
+                <Button variant="outline" className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create Cards
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Stats Overview */}
+        <StatsOverview 
+          subjectsCount={subjects.length}
+          topicsCount={topics.length}
+          flashcardsCount={flashcards.length}
+          isLoading={isLoading}
+        />
+
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-8 mt-8">
+          <div className="lg:col-span-2 space-y-8">
+            <RecentActivity flashcards={flashcards} isLoading={isLoading} />
+            
+            {/* Subjects Overview */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Card className="glass-effect shadow-xl border-0">
+                <CardHeader className="border-b border-gray-200/50">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <BookOpen className="w-6 h-6 text-blue-600" />
+                      Your Subjects
+                    </CardTitle>
+                    <Link to={createPageUrl("Subjects")}>
+                      <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+                        View All <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse" />
+                      ))}
+                    </div>
+                  ) : subjects.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {subjects.slice(0, 4).map((subject) => (
+                        <motion.div
+                          key={subject.id}
+                          whileHover={{ scale: 1.02 }}
+                          className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 hover:shadow-md transition-all duration-300"
+                        >
+                          <h4 className="font-semibold text-gray-800 mb-1">{subject.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            {topics.filter(t => t.subject_id === subject.id).length} topics
+                          </p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600 mb-4">No subjects created yet</p>
+                      <Link to={createPageUrl("Subjects")}>
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                          Create Your First Subject
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          <div className="space-y-8">
+            <QuickActions />
+            
+            {/* Progress Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <Card className="glass-effect shadow-xl border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="w-5 h-5 text-green-600" />
+                    Learning Goal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-white">0</span>
+                    </div>
+                    <p className="text-gray-600 mb-3">Cards studied today</p>
+                    <p className="text-sm text-gray-500">Set your daily goal to stay motivated!</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

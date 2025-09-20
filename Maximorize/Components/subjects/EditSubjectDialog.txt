@@ -1,0 +1,104 @@
+import React, { useState, useEffect } from "react";
+import { Subject } from "@/entities/all";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pencil } from "lucide-react";
+
+export default function EditSubjectDialog({ open, onOpenChange, subject, onSuccess }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    color: "blue"
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (subject) {
+      setFormData({
+        name: subject.name || "",
+        description: subject.description || "",
+        color: subject.color || "blue"
+      });
+    }
+  }, [subject]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !subject) return;
+
+    setIsSaving(true);
+    try {
+      await Subject.update(subject.id, formData);
+      onSuccess();
+    } catch (error) {
+      console.error('Error updating subject:', error);
+    }
+    setIsSaving(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="w-5 h-5" />
+            Edit Subject
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Subject Name</label>
+            <Input
+              placeholder="e.g., Mathematics, Biology, History"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Description (Optional)</label>
+            <Textarea
+              placeholder="Brief description of this subject"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              className="resize-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Color Theme</label>
+            <Select
+              value={formData.color}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="blue">Blue</SelectItem>
+                <SelectItem value="green">Green</SelectItem>
+                <SelectItem value="purple">Purple</SelectItem>
+                <SelectItem value="orange">Orange</SelectItem>
+                <SelectItem value="red">Red</SelectItem>
+                <SelectItem value="teal">Teal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSaving || !formData.name.trim()}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

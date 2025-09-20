@@ -1,0 +1,74 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, FileText, Brain, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function StatsOverview({ subjectsCount, topicsCount, flashcardsCount, isLoading }) {
+  const stats = [
+    {
+      title: "Subjects",
+      value: subjectsCount,
+      icon: BookOpen,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "from-blue-50 to-blue-100"
+    },
+    {
+      title: "Topics",
+      value: topicsCount,
+      icon: FileText,
+      color: "from-purple-500 to-purple-600",
+      bgColor: "from-purple-50 to-purple-100"
+    },
+    {
+      title: "Flashcards",
+      value: flashcardsCount,
+      icon: Brain,
+      color: "from-green-500 to-green-600",
+      bgColor: "from-green-50 to-green-100"
+    },
+    {
+      title: "Study Streak",
+      value: 0,
+      icon: TrendingUp,
+      color: "from-orange-500 to-orange-600",
+      bgColor: "from-orange-50 to-orange-100"
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          whileHover={{ scale: 1.05 }}
+          className="relative"
+        >
+          <Card className="glass-effect shadow-xl border-0 overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.bgColor} rounded-full -translate-y-8 translate-x-8 opacity-20`} />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-xl bg-gradient-to-r ${stat.color} shadow-lg`}>
+                  <stat.icon className="w-5 h-5 text-white" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {isLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+}

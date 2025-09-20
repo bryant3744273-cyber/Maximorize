@@ -1,0 +1,74 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { Plus, Brain, BookOpen, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function QuickActions() {
+  const actions = [
+    {
+      title: "Create Flashcard",
+      description: "Add new study material",
+      icon: Plus,
+      url: createPageUrl("Create"),
+      color: "from-blue-500 to-blue-600"
+    },
+    {
+      title: "Start Studying",
+      description: "Review your cards",
+      icon: Brain,
+      url: createPageUrl("Study"),
+      color: "from-green-500 to-green-600"
+    },
+    {
+      title: "Manage Subjects",
+      description: "Organize your content",
+      icon: BookOpen,
+      url: createPageUrl("Subjects"),
+      color: "from-purple-500 to-purple-600"
+    }
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6, delay: 0.4 }}
+    >
+      <Card className="glass-effect shadow-xl border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="w-5 h-5 text-yellow-500" />
+            Quick Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {actions.map((action, index) => (
+            <motion.div
+              key={action.title}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Link to={action.url}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300"
+                >
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${action.color} mr-3`}>
+                    <action.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-800">{action.title}</div>
+                    <div className="text-sm text-gray-500">{action.description}</div>
+                  </div>
+                </Button>
+              </Link>
+            </motion.div>
+          ))}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}

@@ -1,0 +1,194 @@
+import React, { useState, useEffect } from "react";
+import { Subject, Topic, Flashcard } from "@/entities/all";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Save, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { motion } from "framer-motion";
+
+import CardEditor from "../components/create/CardEditor";
+import SubjectTopicSelector from "../components/create/SubjectTopicSelector";
+import CardPreview from "../components/create/CardPreview";
+
+export default function CreatePage() {
+  const navigate = useNavigate();
+  const [subjects, setSubjects] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [cardData, setCardData] = useState({
+    question_text: "",
+    answer_text: "",
+    question_image: "",
+    answer_image: "",
+    tags: [],
+    difficulty: "medium"
+  });
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    setIsLoading(true);
+    try {
+      const [subjectsData, topicsData] = await Promise.all([
+        Subject.list(),
+        Topic.list()
+      ]);
+      setSubjects(subjectsData);
+      setTopics(topicsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleSaveCard = async () => {
+    if (!selectedSubject || !selectedTopic || !cardData.question_text || !cardData.answer_text) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await Flashcard.create({
+        ...cardData,
+        subject_id: selectedSubject,
+        topic_id: selectedTopic
+      });
+      
+      // Reset form
+      setCardData({
+        question_text: "",
+        answer_text: "",
+        question_image: "",
+        answer_image: "",
+        tags: [],
+        difficulty: "medium"
+      });
+      
+      // Navigate to dashboard
+      navigate(createPageUrl("Dashboard"));
+    } catch (error) {
+      console.error('Error saving flashcard:', error);
+    }
+    setIsSaving(false);
+  };
+
+  const handleCreateAnother = async () => {
+    if (!selectedSubject || !selectedTopic || !cardData.question_text || !cardData.answer_text) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await Flashcard.create({
+        ...cardData,
+        subject_id: selectedSubject,
+        topic_id: selectedTopic
+      });
+      
+      // Reset form but keep subject/topic selection
+      setCardData({
+        question_text: "",
+        answer_text: "",
+        question_image: "",
+        answer_image: "",
+        tags: [],
+        difficulty: "medium"
+      });
+    } catch (error) {
+      console.error('Error saving flashcard:', error);
+    }
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="min-h-screen p-6" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4 mb-8"
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate(createPageUrl("Dashboard"))}
+            className="hover:bg-white/80 hover:shadow-md transition-all duration-300"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Create Flashcards</h1>
+            <p className="text-gray-600">Build your knowledge base with interactive learning cards</p>
+          </div>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Subject/Topic Selection */}
+            <SubjectTopicSelector
+              subjects={subjects}
+              topics={topics}
+              selectedSubject={selectedSubject}
+              selectedTopic={selectedTopic}
+              onSubjectChange={setSelectedSubject}
+              onTopicChange={setSelectedTopic}
+              isLoading={isLoading}
+            />
+
+            {/* Card Editor */}
+            <CardEditor
+              cardData={cardData}
+              setCardData={setCardData}
+              disabled={!selectedSubject || !selectedTopic}
+            />
+          </div>
+
+          <div className="space-y-6">
+            {/* Preview */}
+            <CardPreview cardData={cardData} />
+
+            {/* Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="glass-effect shadow-xl border-0">
+                <CardHeader>
+                  <CardTitle className="text-lg">Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    onClick={handleSaveCard}
+                    disabled={!selectedSubject || !selectedTopic || !cardData.question_text || !cardData.answer_text || isSaving}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSaving ? 'Saving...' : 'Save & Go to Dashboard'}
+                  </Button>
+                  
+                  <Button
+                    onClick={handleCreateAnother}
+                    disabled={!selectedSubject || !selectedTopic || !cardData.question_text || !cardData.answer_text || isSaving}
+                    variant="outline"
+                    className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {isSaving ? 'Saving...' : 'Save & Create Another'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,147 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Brain, BookOpen, Zap, Clock, Target, FileText } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function StudyModeSelector({
+  filteredCards,
+  selectedSubject,
+  selectedTopic,
+  getSubjectName,
+  getTopicName,
+  onStartStudying,
+  onViewAllCards
+}) {
+  const studyModes = [
+    {
+      id: "interactive",
+      title: "Interactive Study",
+      description: "Flip cards and test your knowledge interactively",
+      icon: Brain,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "from-blue-50 to-blue-100"
+    },
+    {
+      id: "quick-review",
+      title: "Quick Review",
+      description: "Rapid-fire review of all selected cards",
+      icon: Zap,
+      color: "from-purple-500 to-purple-600", 
+      bgColor: "from-purple-50 to-purple-100"
+    },
+    {
+      id: "timed",
+      title: "Timed Challenge",
+      description: "Test yourself under time pressure",
+      icon: Clock,
+      color: "from-orange-500 to-orange-600",
+      bgColor: "from-orange-50 to-orange-100"
+    }
+  ];
+
+  if (filteredCards.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="glass-effect shadow-xl border-0">
+          <CardContent className="p-12 text-center">
+            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">No Cards Available</h3>
+            <p className="text-gray-600 mb-6">
+              {selectedSubject || selectedTopic
+                ? "No flashcards match your current filters. Try adjusting your selection."
+                : "No flashcards created yet. Create some cards to start studying!"}
+            </p>
+            <Button
+              onClick={onViewAllCards}
+              variant="outline"
+              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              View All Available Cards
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="space-y-6"
+    >
+      {/* Study Selection Summary */}
+      <Card className="glass-effect shadow-xl border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Target className="w-6 h-6 text-green-600" />
+            Ready to Study
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <span className="text-gray-600">Studying:</span>
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              {filteredCards.length} card{filteredCards.length !== 1 ? 's' : ''}
+            </Badge>
+            {selectedSubject && (
+              <Badge className="bg-blue-100 text-blue-800">
+                Subject: {getSubjectName(selectedSubject)}
+              </Badge>
+            )}
+            {selectedTopic && (
+              <Badge className="bg-purple-100 text-purple-800">
+                Topic: {getTopicName(selectedTopic)}
+              </Badge>
+            )}
+          </div>
+          <p className="text-gray-600">
+            Choose your preferred study mode to begin your learning session.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Study Mode Options */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {studyModes.map((mode, index) => (
+          <motion.div
+            key={mode.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + index * 0.1 }}
+            whileHover={{ scale: 1.03 }}
+            className="group cursor-pointer"
+          >
+            <Card 
+              className="glass-effect shadow-xl border-0 hover:shadow-2xl transition-all duration-300 overflow-hidden h-full"
+              onClick={() => onStartStudying(mode.id)}
+            >
+              <div className={`h-2 bg-gradient-to-r ${mode.color}`} />
+              <CardContent className="p-6 h-full flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-3 rounded-xl bg-gradient-to-r ${mode.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <mode.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800">{mode.title}</h3>
+                </div>
+                <p className="text-gray-600 flex-1">{mode.description}</p>
+                <Button 
+                  className={`w-full mt-4 bg-gradient-to-r ${mode.color} hover:shadow-lg transition-all duration-300`}
+                >
+                  Start {mode.title}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}

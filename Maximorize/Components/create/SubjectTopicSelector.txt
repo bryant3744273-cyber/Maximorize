@@ -1,0 +1,203 @@
+import React, { useState } from "react";
+import { Subject, Topic } from "@/entities/all";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, BookOpen, FileText } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function SubjectTopicSelector({
+  subjects,
+  topics,
+  selectedSubject,
+  selectedTopic,
+  onSubjectChange,
+  onTopicChange,
+  isLoading
+}) {
+  const [showCreateSubject, setShowCreateSubject] = useState(false);
+  const [showCreateTopic, setShowCreateTopic] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [newTopicName, setNewTopicName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+
+  const filteredTopics = topics.filter(topic => topic.subject_id === selectedSubject);
+
+  const handleCreateSubject = async () => {
+    if (!newSubjectName.trim()) return;
+    
+    setIsCreating(true);
+    try {
+      const newSubject = await Subject.create({
+        name: newSubjectName,
+        color: "blue"
+      });
+      onSubjectChange(newSubject.id);
+      setNewSubjectName("");
+      setShowCreateSubject(false);
+      // Refresh subjects list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating subject:', error);
+    }
+    setIsCreating(false);
+  };
+
+  const handleCreateTopic = async () => {
+    if (!newTopicName.trim() || !selectedSubject) return;
+    
+    setIsCreating(true);
+    try {
+      const newTopic = await Topic.create({
+        name: newTopicName,
+        subject_id: selectedSubject
+      });
+      onTopicChange(newTopic.id);
+      setNewTopicName("");
+      setShowCreateTopic(false);
+      // Refresh topics list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating topic:', error);
+    }
+    setIsCreating(false);
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Card className="glass-effect shadow-xl border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              Select Subject & Topic
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Subject Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Subject</label>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedSubject}
+                    onValueChange={onSubjectChange}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Choose a subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.id}>
+                          {subject.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowCreateSubject(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Topic Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Topic</label>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedTopic}
+                    onValueChange={onTopicChange}
+                    disabled={!selectedSubject || isLoading}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Choose a topic" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredTopics.map((topic) => (
+                        <SelectItem key={topic.id} value={topic.id}>
+                          {topic.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowCreateTopic(true)}
+                    disabled={!selectedSubject}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Create Subject Dialog */}
+      <Dialog open={showCreateSubject} onOpenChange={setShowCreateSubject}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              Create New Subject
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Subject name"
+              value={newSubjectName}
+              onChange={(e) => setNewSubjectName(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateSubject(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateSubject} disabled={isCreating}>
+                {isCreating ? 'Creating...' : 'Create'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Topic Dialog */}
+      <Dialog open={showCreateTopic} onOpenChange={setShowCreateTopic}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Create New Topic
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Topic name"
+              value={newTopicName}
+              onChange={(e) => setNewTopicName(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateTopic(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateTopic} disabled={isCreating}>
+                {isCreating ? 'Creating...' : 'Create'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

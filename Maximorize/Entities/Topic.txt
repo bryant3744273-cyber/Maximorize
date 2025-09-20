@@ -1,0 +1,27 @@
+{
+  "name": "Topic",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the topic"
+    },
+    "description": {
+      "type": "string",
+      "description": "Topic description"
+    },
+    "subject_id": {
+      "type": "string",
+      "description": "ID of the parent subject"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Order within subject"
+    }
+  },
+  "required": [
+    "name",
+    "subject_id"
+  ]
+}

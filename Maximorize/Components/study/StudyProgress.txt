@@ -1,0 +1,55 @@
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { TrendingUp, Target, CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function StudyProgress({ current, total, stats }) {
+  const progressPercent = (current / total) * 100;
+  const accuracyPercent = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-8"
+    >
+      <Card className="glass-effect shadow-xl border-0">
+        <CardContent className="p-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold text-gray-700">Progress</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-800 mb-2">
+                {current} / {total}
+              </div>
+              <Progress value={progressPercent} className="h-2" />
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="font-semibold text-gray-700">Correct</span>
+              </div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.correct} / {stats.total}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+                <span className="font-semibold text-gray-700">Accuracy</span>
+              </div>
+              <div className="text-2xl font-bold text-purple-600">
+                {accuracyPercent.toFixed(0)}%
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}

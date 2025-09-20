@@ -1,0 +1,34 @@
+{
+  "name": "Subject",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the subject"
+    },
+    "description": {
+      "type": "string",
+      "description": "Subject description"
+    },
+    "color": {
+      "type": "string",
+      "enum": [
+        "blue",
+        "green",
+        "purple",
+        "orange",
+        "red",
+        "teal"
+      ],
+      "default": "blue",
+      "description": "Subject color theme"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon identifier for the subject"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

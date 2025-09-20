@@ -1,0 +1,87 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { BookOpen, FileText, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const colorThemes = {
+  blue: "from-blue-500 to-blue-600",
+  green: "from-green-500 to-green-600", 
+  purple: "from-purple-500 to-purple-600",
+  orange: "from-orange-500 to-orange-600",
+  red: "from-red-500 to-red-600",
+  teal: "from-teal-500 to-teal-600"
+};
+
+export default function SubjectCard({ subject, topicsCount, index, onEdit, onDelete }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      whileHover={{ scale: 1.02 }}
+      className="group"
+    >
+      <Card className="glass-effect shadow-xl border-0 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <div className={`h-2 bg-gradient-to-r ${colorThemes[subject.color] || colorThemes.blue}`} />
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${colorThemes[subject.color] || colorThemes.blue} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-gray-800 group-hover:text-gray-900 transition-colors">
+                  {subject.name}
+                </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  {subject.description || "No description"}
+                </p>
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>Edit</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-600">
+                {topicsCount} {topicsCount === 1 ? 'topic' : 'topics'}
+              </span>
+            </div>
+            <Badge 
+              variant="secondary" 
+              className={`bg-gradient-to-r ${colorThemes[subject.color] || colorThemes.blue} text-white border-0`}
+            >
+              {subject.color}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
